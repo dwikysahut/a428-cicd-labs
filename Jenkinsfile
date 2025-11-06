@@ -9,11 +9,19 @@ node {
         stage('Test') {
             sh './jenkins/scripts/test.sh'
         }
-
+stage('Manual Approval') {
+        input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
+}
         stage('Deploy') {
-            sh './jenkins/scripts/deliver.sh'
-            input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
-            sh './jenkins/scripts/kill.sh'
-        }
+        echo 'Menjalankan aplikasi React...'
+        sh './jenkins/scripts/deliver.sh' // build & start app
+
+        echo 'Menjeda pipeline selama 1 menit agar app bisa diuji...'
+        sh 'sleep 60' // jeda 1 menit (60 detik)
+
+        echo 'Menghentikan aplikasi setelah 1 menit berjalan...'
+        sh './jenkins/scripts/kill.sh' // stop app pakai PID
+}
+
     }
 }
